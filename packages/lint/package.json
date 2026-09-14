@@ -1,7 +1,7 @@
 {
   "name": "@shadcn/lint",
-  "version": "0.0.0",
-  "description": "A programmable linter for Tailwind design systems.",
+  "version": "0.1.0",
+  "description": "A programmable agent-first linter for Tailwind design systems.",
   "license": "MIT",
   "author": {
     "name": "shadcn",
@@ -17,6 +17,9 @@
     "url": "https://github.com/shadcn-ui/lint/issues"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "sideEffects": [
     "./dist/tailwind-worker.js"
   ],
@@ -35,7 +38,7 @@
     "build": "tsdown && node scripts/postbuild.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
-    "prepack": "node -e \"const fs=require('fs');fs.copyFileSync('../../README.md','README.md');fs.copyFileSync('../../LICENSE','LICENSE')\"",
+    "prepack": "node scripts/prepack.mjs",
     "postpack": "node -e \"const fs=require('fs');fs.rmSync('README.md',{force:true});fs.rmSync('LICENSE',{force:true})\""
   },
   "keywords": [

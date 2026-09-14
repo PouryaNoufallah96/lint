@@ -12,7 +12,30 @@ You define what’s allowed. When an agent breaks a rule, the error explains wha
 
 `@shadcn/lint` works with Tailwind v4 projects (**shadcn/ui not required**). Available for both **ESLint and Oxlint**.
 
-## TypeScript and @shadcn/lint
+## Table of contents
+
+- [Quickstart](#quickstart)
+- [TypeScript vs @shadcn/lint](#typescript-vs-shadcnlint)
+- [Built for agents](#built-for-agents)
+- [Get started](#get-started)
+- [Rules](#rules)
+- [Configuration](#settings)
+
+## Quickstart
+
+Give your coding agent this prompt:
+
+```text
+Read https://github.com/shadcn-ui/lint/blob/main/SETUP.md
+and set up @shadcn/lint in this project.
+```
+
+Once installed, [choose your rules](#rules) and configure what’s allowed
+in your design system.
+
+Prefer to configure it yourself? See [Get started](#get-started).
+
+## TypeScript vs @shadcn/lint
 
 Take a Button that allows margin and width, but controls its own padding.
 You can enforce that with types by limiting its `style` prop to
