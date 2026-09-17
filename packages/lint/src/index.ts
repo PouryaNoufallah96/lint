@@ -11,6 +11,7 @@ export { lintFiles } from "./api"
 export type {
   ShadcnLintConfig,
   ShadcnLintDiagnostic,
+  ShadcnLintOverride,
   ShadcnLintSuggestion,
   ShadcnRuleId,
   ShadcnRuleSetting,

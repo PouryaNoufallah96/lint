@@ -31,7 +31,21 @@ const diagnostics = await lintFiles(["src"], {
 
 Each diagnostic includes an absolute file path, source range, severity, rule
 ID, message, and any replacement suggestions. `settings`, `files`, and
-`ignores` accept the corresponding plugin configuration values.
+`ignores` accept the corresponding plugin configuration values. `overrides`
+accepts ESLint-style per-path rule settings, applied in order with later
+entries winning:
+
+```ts
+{
+  rules: { "shadcn/no-restyle": ["error", { allow: ["layout"] }] },
+  overrides: [
+    {
+      files: ["packages/ui/src/components/**"],
+      rules: { "shadcn/no-restyle": "off" },
+    },
+  ],
+}
+```
 
 ## Experimental project API
 
