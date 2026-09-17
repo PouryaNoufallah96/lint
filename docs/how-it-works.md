@@ -91,10 +91,14 @@ rule warns and uses a [grammar fallback](./rules/no-unknown-classes.md).
 `cva` and `tv` definitions, plus props typed as string unions, such as
 `variant?: "default" | "destructive"` or `size?: "sm" | "lg"`.
 
-Props resolve through intersections and same-file type aliases and
-interfaces. Prop definitions apply only to their component; a factory
-definition can be used for other components in the same file. Spacing
-findings suggest values from the `size` axis.
+Props resolve through intersections, unions, and same-file type aliases
+and interfaces. A prop typed with an alias reads the same as the union
+written inline, and `keyof typeof` a lookup object declared in the file
+lists that object's keys, the shape a design system without `cva` uses.
+When props are a union of shapes — an anchor or a button — the variants
+listed are the ones every member accepts. Prop definitions apply only to
+their component; a factory definition can be used for other components in
+the same file. Spacing findings suggest values from the `size` axis.
 
 The file can come from the UI directory or a resolved import, including
 a barrel. Variant suggestions work without `components.json`.
