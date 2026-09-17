@@ -15,6 +15,15 @@ import { warnOnce } from "./warn"
 
 export type ScaleKind = "radius" | "text"
 
+// What a project's own CSS names: the @theme declarations, the color
+// tokens among them, and its @utility names. One object per theme read,
+// replaced when the CSS changes, so callers can memo against its identity.
+export type ThemeVocabulary = {
+  names: Set<string>
+  tokens: Set<string>
+  utilities: Set<string>
+}
+
 type Declaration = { name: string; value: string; theme: boolean }
 
 type ThemeRead = {
@@ -35,6 +44,7 @@ type ThemeRead = {
   colors?: Map<string, Lab>
   scales?: Record<ScaleKind, Map<string, number>>
   spacing?: number | null
+  vocabulary?: ThemeVocabulary
 }
 
 const cache = new Map<
@@ -457,6 +467,18 @@ export function scaleFor(fromFile: string, kind: ScaleKind) {
   const cssFile = themeFileFor(fromFile)
   if (!cssFile) return DEFAULT_SCALES[kind]
   return scaleOf(themeAt(cssFile), kind)
+}
+
+// Null when the project has no theme to read.
+export function themeVocabularyFor(fromFile: string) {
+  const cssFile = themeFileFor(fromFile)
+  if (!cssFile) return null
+  const read = themeAt(cssFile)
+  return (read.vocabulary ??= {
+    names: read.themeNames,
+    tokens: read.tokens,
+    utilities: read.utilities,
+  })
 }
 
 // What a project's CSS declares beyond Tailwind's own.

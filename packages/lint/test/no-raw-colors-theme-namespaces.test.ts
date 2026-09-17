@@ -1,0 +1,80 @@
+// Tailwind resolves a utility against a theme namespace of its own as
+// well as --color-*, so --text-stat-label makes text-stat-label a
+// font-size and --shadow-card-glow a box-shadow. Both share a prefix
+// with a color utility and neither is a color: reporting them as
+// undeclared theme colors sends an agent to delete a token the theme
+// declares. The classes that are still colors need the oracle to settle
+// who owns the typo, so they skip without it.
+
+import * as path from "node:path"
+import { describe, test } from "vitest"
+
+import { noRawColors } from "../src/rules/no-raw-colors"
+import { oracleAvailable } from "../src/tailwind/client"
+import { createTester, PROJECT } from "./helpers"
+
+const PAGE = path.join(path.dirname(PROJECT), "namespace-theme/app/page.tsx")
+
+const oracle = oracleAvailable()
+
+describe("no-raw-colors and theme namespaces", () => {
+  test("a declared non-color namespace is not an undeclared color", () => {
+    createTester().run("no-raw-colors", noRawColors as any, {
+      valid: [
+        // --text-stat-label: a font-size, not a color.
+        {
+          filename: PAGE,
+          code: `export const A = () => <p className="text-stat-label" />`,
+        },
+        // --shadow-card-glow and --drop-shadow-lift: box-shadows.
+        {
+          filename: PAGE,
+          code: `export const A = () => <div className="shadow-card-glow drop-shadow-lift" />`,
+        },
+        // bg-* reads --background-image-*, where the namespace and the
+        // prefix are not the same word.
+        {
+          filename: PAGE,
+          code: `export const A = () => <div className="bg-stripes" />`,
+        },
+        // A variant and a modifier do not change the namespace.
+        {
+          filename: PAGE,
+          code: `export const A = () => <p className="md:text-stat-label hover:shadow-card-glow/50" />`,
+        },
+        // The project's own @utility is its own vocabulary.
+        {
+          filename: PAGE,
+          code: `export const A = () => <p className="text-callout" />`,
+        },
+        // The declared color still reads as a color.
+        {
+          filename: PAGE,
+          code: `export const A = () => <div className="bg-primary text-primary" />`,
+        },
+      ],
+      invalid: [],
+    })
+  })
+
+  // A namespace declared for one prefix does not open another.
+  describe.skipIf(!oracle)("with the oracle", () => {
+    test("an undeclared color is still an undeclared color", () => {
+      createTester().run("no-raw-colors", noRawColors as any, {
+        valid: [],
+        invalid: [
+          {
+            filename: PAGE,
+            code: `export const A = () => <div className="bg-stat-label" />`,
+            errors: [{ messageId: "undeclaredToken" }],
+          },
+          {
+            filename: PAGE,
+            code: `export const A = () => <div className="text-brand" />`,
+            errors: [{ messageId: "undeclaredToken" }],
+          },
+        ],
+      })
+    }, 60_000)
+  })
+})
