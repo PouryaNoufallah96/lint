@@ -179,8 +179,8 @@ values. A props spread counts as forwarding only if it still contains
 
 ## Where it looks
 
-- `className` and similar props, including `wrapperClassName` and
-  `classNames={{ day: "..." }}`.
+- `className` and similar props, including `wrapperClassName`,
+  `classNames={{ day: "..." }}`, and Astro's `class:list`.
 - Calls to `cn`, `cx`, `clsx`, `cva`, `tv`, `twMerge`, `twJoin`, and
   `classNames`, including calls outside JSX. Add functions through
   `mergeFunctions` and `variantFunctions` in shared settings or rule options.

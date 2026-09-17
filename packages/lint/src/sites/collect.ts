@@ -55,12 +55,21 @@ export const DEFAULT_MERGE_FUNCTIONS = [
 // Object arguments carry classes as values (cva), not keys (clsx).
 export const DEFAULT_VARIANT_FUNCTIONS = ["cva", "tv"]
 
-const CLASS_ATTRIBUTE = /class(name)?s?$/i
+const CLASS_ATTRIBUTE = /^(class:list|[^:]*class(name)?s?)$/i
 
 const NODE_MODULES = /[\\/]node_modules[\\/]/
 
 export function isClassAttribute(name: string) {
   return CLASS_ATTRIBUTE.test(name)
+}
+
+// Astro's `class:list` parses as a namespaced name.
+export function attributeNameOf(attribute: any) {
+  const name = attribute?.name
+  if (name?.type === "JSXNamespacedName") {
+    return `${name.namespace?.name}:${name.name?.name}`
+  }
+  return typeof name?.name === "string" ? name.name : ""
 }
 
 export type TrackerOptions = {
@@ -348,7 +357,7 @@ function isEscaped(variable: any, context?: any) {
       if (
         attribute?.type === "JSXAttribute" &&
         (attribute.name?.name === "style" ||
-          isClassAttribute(attribute.name?.name ?? ""))
+          isClassAttribute(attributeNameOf(attribute)))
       )
         return false
       // A helper reads its arguments and never keeps them, directly or
@@ -1070,7 +1079,7 @@ export function classSiteVisitors(
       siteFor(
         node,
         node.value,
-        node.name.name,
+        attributeNameOf(node),
         elementOf(node),
         jsxElementOf(node)
       ),
@@ -1118,8 +1127,7 @@ export function classSiteVisitors(
       tracker.collectImport(node)
     },
     JSXAttribute(node: any) {
-      const name = node.name?.name
-      if (typeof name !== "string" || !isClassAttribute(name)) return
+      if (!isClassAttribute(attributeNameOf(node))) return
       for (const site of attributeSites(node)) emit(site)
     },
     JSXSpreadAttribute(node: any) {
