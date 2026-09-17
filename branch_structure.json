@@ -1,0 +1,45 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "changeset-release/main",
+    "feat/biome-workflow-rebased",
+    "fix/astro-class-list",
+    "fix/component-name-from-export",
+    "fix/custom-utility-unclassified",
+    "fix/legacy-utility-names",
+    "fix/render-prop-attribution",
+    "fix/stylesheet-realpath",
+    "fix/theme-entry-without-tailwind",
+    "fix/theme-namespace-false-positives",
+    "fix/variant-names-through-alias",
+    "main"
+  ],
+  "parent": {
+    "changeset-release/main": "main",
+    "feat/biome-workflow-rebased": "main",
+    "fix/astro-class-list": "main",
+    "fix/component-name-from-export": "main",
+    "fix/custom-utility-unclassified": "main",
+    "fix/legacy-utility-names": "main",
+    "fix/render-prop-attribution": "main",
+    "fix/stylesheet-realpath": "main",
+    "fix/theme-entry-without-tailwind": "main",
+    "fix/theme-namespace-false-positives": "main",
+    "fix/variant-names-through-alias": "main",
+    "main": null
+  },
+  "order": [
+    "main",
+    "changeset-release/main",
+    "feat/biome-workflow-rebased",
+    "fix/astro-class-list",
+    "fix/component-name-from-export",
+    "fix/custom-utility-unclassified",
+    "fix/legacy-utility-names",
+    "fix/render-prop-attribution",
+    "fix/stylesheet-realpath",
+    "fix/theme-entry-without-tailwind",
+    "fix/theme-namespace-false-positives",
+    "fix/variant-names-through-alias"
+  ]
+}
