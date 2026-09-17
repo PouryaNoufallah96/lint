@@ -3,13 +3,14 @@
 
 import { CATEGORIES, categoryOf } from "../grammar/categories"
 import { isMarkerClass, normalizeClass } from "../grammar/classes"
-import { classifierFor, resolveCnConfig } from "../grammar/classifier"
+import { resolveCnConfig } from "../grammar/classifier"
 import { didYouMean } from "../grammar/similar"
+import { projectClassifierFor } from "../project/namespaces"
 import { knownClassesFor } from "../project/theme"
 import { warnOnce } from "../project/warn"
 import { checkMessage } from "./messages"
 
-type Classifier = ReturnType<typeof classifierFor>
+type Classifier = ReturnType<typeof projectClassifierFor>
 
 export type MessageKey = (typeof CATEGORIES)[number] | "layout" | "default"
 
@@ -143,7 +144,7 @@ export function createMatcher(
     fromFile,
     `matcher:${JSON.stringify(entries ?? [])}`,
     () => {
-      const classifier = classifierFor(fromFile)
+      const classifier = projectClassifierFor(fromFile)
       const set = compileEntries(
         entries,
         groupIdsFor(resolveCnConfig(fromFile)),
@@ -262,7 +263,7 @@ export function checkAllowEntries(
   rule: string
 ) {
   if (!entries?.length) return
-  const classifier = classifierFor(fromFile)
+  const classifier = projectClassifierFor(fromFile)
   const groupIds = groupIdsFor(resolveCnConfig(fromFile))
   for (const entry of entries) {
     if (
@@ -314,7 +315,7 @@ function buildContracts(
   inputs: ContractInput[] | undefined,
   options: PolicyInput & { fromFile?: string }
 ) {
-  const classifier = classifierFor(options.fromFile)
+  const classifier = projectClassifierFor(options.fromFile)
   const groupIds = groupIdsFor(resolveCnConfig(options.fromFile))
   // Entries first, so a typo is named before a list that does nothing.
   if (!options.uncheckedEntries) {

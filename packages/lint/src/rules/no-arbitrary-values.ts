@@ -9,8 +9,8 @@ import {
   splitVariants,
   withBase,
 } from "../grammar/classes"
-import { classifierFor } from "../grammar/classifier"
 import { lengthInPx } from "../grammar/lengths"
+import { projectClassifierFor } from "../project/namespaces"
 import {
   colorTokensFor,
   colorValuesFor,
@@ -161,7 +161,7 @@ export const noArbitraryValues = {
     } catch (error) {
       return configErrorVisitors(context, error)
     }
-    const { groupOf } = classifierFor(filename)
+    const { groupOf } = projectClassifierFor(filename)
 
     let file: string | undefined
     let unitPx: number | null | undefined

@@ -5,8 +5,8 @@
 
 import { categoryOf } from "../grammar/categories"
 import { isMarkerClass, normalizeClass, splitClasses } from "../grammar/classes"
-import { classifierFor } from "../grammar/classifier"
 import { didYouMean } from "../grammar/similar"
+import { projectClassifierFor } from "../project/namespaces"
 import { colorTokensFor, knownClassesFor, themeFileFor } from "../project/theme"
 import { classSiteVisitors } from "../sites/collect"
 import { unknownClasses } from "../tailwind/client"
@@ -64,7 +64,7 @@ export const noUnknownClasses = {
     } catch (error) {
       return configErrorVisitors(context, error)
     }
-    const { groupOf } = classifierFor(filename)
+    const { groupOf } = projectClassifierFor(filename)
     const known = knownClassesFor(filename)
     const themeFile = themeFileFor(filename)
     const file = themeFile ? displayPath(themeFile, context) : "your theme CSS"

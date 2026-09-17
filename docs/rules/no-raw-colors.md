@@ -38,6 +38,14 @@ Variants, opacity, and important markers are preserved in replacements.
 color names. Arbitrary colors such as `bg-[#333]` belong to
 [no-arbitrary-values](./no-arbitrary-values.md).
 
+Some theme namespaces share a prefix with a color utility. Declaring
+`--text-stat-label` makes `text-stat-label` a font size, and
+`--shadow-card-glow` makes `shadow-card-glow` a box shadow. Neither is a
+color, and neither is reported as one; the same holds for
+`--inset-shadow-*`, `--drop-shadow-*`, `--text-shadow-*`, and
+`--background-image-*`. Classes your CSS declares with `@utility` are
+your vocabulary too.
+
 ### SVG attributes
 
 Use `currentColor` with a text color class, or reference a theme variable:
