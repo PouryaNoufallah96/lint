@@ -3,12 +3,18 @@
 // synchronous bridge is exercised by the no-unknown-classes rule tests.
 
 import * as path from "node:path"
+import { fileURLToPath } from "node:url"
 import { describe, expect, test } from "vitest"
 
 import { query, resetOracle, resolveStylesheet } from "../src/tailwind/oracle"
 import { PROJECT } from "./helpers"
 
 const CSS = path.join(PROJECT, "app/globals.css")
+
+const LINKED = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "fixtures/pnpm-linked/src/app.css"
+)
 
 describe("tailwind oracle", () => {
   test("knows the theme, @utility rules and every variant", async () => {
@@ -77,6 +83,18 @@ describe("tailwind oracle", () => {
       "group",
       "peer/x",
       "legacy-card",
+    ])
+  })
+
+  // A pnpm-linked package installs its own dependencies beside the real
+  // file: an @import inside it resolves from there, not from the link.
+  test("builds a theme importing a pnpm-linked package", async () => {
+    resetOracle()
+    const answer = await query(LINKED, ["kit-frame", "flex", "kit-frmae"])
+    expect(answer.ok).toBe(true)
+    if (!answer.ok) return
+    expect(answer.unknown).toEqual([
+      { token: "kit-frmae", suggestion: "kit-frame", baseKnown: false },
     ])
   })
 
