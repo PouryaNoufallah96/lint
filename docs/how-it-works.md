@@ -177,6 +177,21 @@ Wrapper chains can cross files and use namespace imports such as
 values. A props spread counts as forwarding only if it still contains
 `className`. If several targets qualify, the first supplies the contract.
 
+A `render` prop forwards the same way. Base UI renders another component
+in a trigger's place, and the `className` goes with it:
+
+```tsx
+// no-restyle reports a color override on Button through DialogTrigger.
+<DialogTrigger render={<Button />} className="bg-primary">
+  Open
+</DialogTrigger>
+```
+
+The suggestion lists Button's variants, since Button is what wears the
+classes. `render={(props) => <Button {...props} />}` reads the same. A
+trigger that renders a plain element, such as `render={<span />}`,
+restyles nothing in the design system and is not reported.
+
 ## Where it looks
 
 - `className` and similar props, including `wrapperClassName`,
