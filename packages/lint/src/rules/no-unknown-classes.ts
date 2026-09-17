@@ -7,7 +7,12 @@ import { categoryOf } from "../grammar/categories"
 import { isMarkerClass, normalizeClass, splitClasses } from "../grammar/classes"
 import { didYouMean } from "../grammar/similar"
 import { projectClassifierFor } from "../project/namespaces"
-import { colorTokensFor, knownClassesFor, themeFileFor } from "../project/theme"
+import {
+  colorTokensFor,
+  knownClassesFor,
+  tailwindEntryFor,
+  themeFileFor,
+} from "../project/theme"
 import { classSiteVisitors } from "../sites/collect"
 import { unknownClasses } from "../tailwind/client"
 import { compileVocabularyPolicy, configErrorVisitors } from "./contracts"
@@ -68,6 +73,9 @@ export const noUnknownClasses = {
     const known = knownClassesFor(filename)
     const themeFile = themeFileFor(filename)
     const file = themeFile ? displayPath(themeFile, context) : "your theme CSS"
+    // A theme file that does not import Tailwind knows no base utilities,
+    // so the grammar answers instead of a half-built design system.
+    const entry = tailwindEntryFor(filename)
     const utilityPrefixes = [...known.utilities]
       .filter((name) => name.endsWith("*"))
       .map((name) => name.slice(0, -1))
@@ -154,7 +162,7 @@ export const noUnknownClasses = {
         if (!tokens.length) continue
         // The worker tells a misspelled variant on a real color from a
         // utility that only looks like one, prefix and all.
-        const asked = themeFile ? unknownClasses(themeFile, tokens) : null
+        const asked = entry ? unknownClasses(entry, tokens) : null
         if (asked) {
           for (const { token, suggestion, baseKnown } of asked) {
             if (

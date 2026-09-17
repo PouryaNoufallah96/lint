@@ -358,6 +358,32 @@ export function themeFileFor(fromFile: string) {
   return discoverThemeFile(project.root)
 }
 
+// The stylesheet whose Tailwind answers which classes exist. A
+// components.json can point tailwind.css at a partial that declares tokens
+// without importing Tailwind, the normal shape for a component package in
+// a monorepo. A theme built from that file holds no base utilities, so
+// every stock class would read as unknown: say so once and ask a
+// discovered entry meanwhile, so the theme's own tokens still name the
+// file a token belongs in.
+export function tailwindEntryFor(fromFile: string) {
+  const file = themeFileFor(fromFile)
+  if (!file || themeAt(file).tailwind) return file
+  const project = projectFor(fromFile)
+  if (!project) return file
+  const discovered = discoverThemeFile(project.root)
+  const shown = (candidate: string) =>
+    path.relative(project.root, candidate).replace(/\\/g, "/")
+  warnOnce(
+    `theme:no-tailwind:${file}`,
+    `components.json sets tailwind.css to ${shown(file)}, which does not import Tailwind. ${
+      discovered
+        ? `Using ${shown(discovered)} to read the classes Tailwind knows until the path is fixed.`
+        : "No stylesheet importing Tailwind was found under the project, so no-unknown-classes is using the grammar bundled with @shadcn/lint until the path is fixed."
+    }`
+  )
+  return discovered
+}
+
 export function colorTokensFor(fromFile: string) {
   const cssFile = themeFileFor(fromFile)
   if (!cssFile) return null
