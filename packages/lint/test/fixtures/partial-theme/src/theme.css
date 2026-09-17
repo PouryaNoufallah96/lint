@@ -1,0 +1,4 @@
+/* Tokens only: the consumer imports Tailwind, so this one does not. */
+@theme inline {
+  --color-brand: #123456;
+}

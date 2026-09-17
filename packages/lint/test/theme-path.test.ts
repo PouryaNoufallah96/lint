@@ -1,6 +1,7 @@
-// components.json can name a stylesheet that is not there. That is a
-// wrong path, not a project without a theme: it warns once and the
-// theme is discovered in the meantime, so the token check stays on.
+// components.json can name a stylesheet that is not there, or one that
+// declares tokens without importing Tailwind. Either is a wrong path, not
+// a project without a theme: it warns once and the theme is discovered in
+// the meantime, so the checks stay on.
 
 import * as fs from "node:fs"
 import * as os from "node:os"
@@ -8,7 +9,11 @@ import * as path from "node:path"
 import { afterEach, beforeEach, expect, test } from "vitest"
 
 import { resetFsMemo } from "../src/project/fs"
-import { colorTokensFor, themeFileFor } from "../src/project/theme"
+import {
+  colorTokensFor,
+  tailwindEntryFor,
+  themeFileFor,
+} from "../src/project/theme"
 import { resetWarnings, setWarningSink } from "../src/project/warn"
 
 const warnings: string[] = []
@@ -66,4 +71,30 @@ test("with nothing to discover, the warning says the token check is off", () => 
   expect(warnings).toHaveLength(1)
   expect(warnings[0]).toContain("src/styles/globals.css")
   expect(warnings[0]).toContain("no-raw-colors cannot check declared tokens")
+})
+
+test("a tailwind.css that does not import Tailwind warns once and falls back", () => {
+  const configured = write(
+    "src/styles/globals.css",
+    "@theme inline { --color-brand: #f00; }\n"
+  )
+  const entry = write("src/app/app.css", '@import "tailwindcss";\n')
+  const page = path.join(root, "src/app/page.tsx")
+  // The partial is still the theme: its tokens are the project's.
+  expect(themeFileFor(page)).toBe(configured)
+  expect(colorTokensFor(page)).toEqual(new Set(["brand"]))
+  expect(tailwindEntryFor(page)).toBe(entry)
+  tailwindEntryFor(page)
+  expect(warnings).toHaveLength(1)
+  expect(warnings[0]).toContain("src/styles/globals.css")
+  expect(warnings[0]).toContain("does not import Tailwind")
+  expect(warnings[0]).toContain("Using src/app/app.css")
+})
+
+test("with no Tailwind entry to discover, the warning says the grammar answers", () => {
+  write("src/styles/globals.css", "@theme inline { --color-brand: #f00; }\n")
+  const page = path.join(root, "src/app/page.tsx")
+  expect(tailwindEntryFor(page)).toBeNull()
+  expect(warnings).toHaveLength(1)
+  expect(warnings[0]).toContain("grammar bundled with @shadcn/lint")
 })

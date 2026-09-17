@@ -171,6 +171,48 @@ describe.skipIf(!oracle)("a broken theme is unavailable on its own", () => {
   })
 })
 
+// components.json can point tailwind.css at a partial that declares tokens
+// without importing Tailwind. A theme built from it holds no base utility,
+// so every stock class would read as unknown.
+describe.skipIf(!oracle)("a theme file that does not import Tailwind", () => {
+  const page = path.join(FIXTURES, "partial-theme/src/page.tsx")
+  test("stock classes are known, and the partial is still where a token belongs", () => {
+    resetOracleMemo()
+    const code = `export const A = () => <div className="flex-cols" />`
+    tester.run("no-unknown-classes", noUnknownClasses as any, {
+      valid: [
+        {
+          filename: page,
+          code: `export const A = () => <div className="flex p-4 text-sm bg-brand" />`,
+        },
+      ],
+      invalid: [
+        {
+          filename: page,
+          code,
+          errors: [
+            {
+              messageId: "unknownClassSuggest",
+              data: {
+                className: "flex-cols",
+                suggestion: "flex-col",
+                file: "test/fixtures/partial-theme/src/theme.css",
+              },
+              suggestions: [
+                {
+                  messageId: "useSuggestion",
+                  data: { suggestion: "flex-col" },
+                  output: code.replace("flex-cols", "flex-col"),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+  })
+})
+
 describe.skipIf(!oracleAvailable())("prefixed variant typos", () => {
   const page = path.join(FIXTURES, "prefixed/app/page.tsx")
   test("the prefix is kept when the bare utility is checked", () => {

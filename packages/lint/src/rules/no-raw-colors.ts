@@ -17,6 +17,7 @@ import {
   colorTokensFor,
   colorValuesFor,
   knownClassesFor,
+  tailwindEntryFor,
   themeFileFor,
 } from "../project/theme"
 import { classSiteVisitors } from "../sites/collect"
@@ -171,7 +172,9 @@ export const noRawColors = {
         : "your theme CSS"
       return {
         declared,
-        themeFile,
+        // The stylesheet the oracle can build: not every theme file
+        // imports Tailwind.
+        entry: tailwindEntryFor(filename),
         file,
         memo: verdictMemo(declared ?? NO_THEME, file),
       }
@@ -242,8 +245,8 @@ export const noRawColors = {
     // typo belongs to no-unknown-classes and this rule stays quiet, so
     // the class is reported once.
     const isTypoOfAnotherUtility = (token: string) => {
-      const { themeFile } = themeFor()
-      const asked = themeFile ? unknownClasses(themeFile, [token]) : null
+      const { entry } = themeFor()
+      const asked = entry ? unknownClasses(entry, [token]) : null
       const suggestion = asked?.[0]?.suggestion
       return !!suggestion && categoryOf(groupOf(suggestion)) !== "color"
     }

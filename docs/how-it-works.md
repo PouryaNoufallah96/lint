@@ -85,6 +85,12 @@ Tailwind runs in a worker thread because its loader is asynchronous.
 Answers are cached per theme. If Tailwind or the theme cannot load, the
 rule warns and uses a [grammar fallback](./rules/no-unknown-classes.md).
 
+A theme CSS that declares tokens without importing Tailwind — the usual
+shape for a component package — knows no base utilities, so the rule
+would report every stock class. When `components.json` names such a file,
+the linter warns once and asks a discovered entry instead, while the file
+it names stays the one a token belongs in.
+
 ## Variants
 
 `no-restyle` suggests variants found in the component file. It reads
