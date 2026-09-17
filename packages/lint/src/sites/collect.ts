@@ -975,6 +975,28 @@ function sharedFor(context: any, options: SiteOptions): Shared {
   return shared
 }
 
+// Base UI renders another element in a component's place through
+// `render`, and the className goes with it: `<DialogTrigger
+// render={<Button />} className="bg-primary" />` is a Button. Returns
+// the opening element the classes reach, null when nothing readable
+// wears them, and undefined when there is no render prop at all.
+function renderedOpeningOf(element: any) {
+  const attribute = (element.attributes ?? []).find(
+    (candidate: any) =>
+      candidate.type === "JSXAttribute" && candidate.name?.name === "render"
+  )
+  if (!attribute) return undefined
+  const value = attribute.value
+  if (value?.type !== "JSXExpressionContainer") return null
+  let expression = value.expression
+  // `render={(props) => <Button {...props} />}` hands the classes to the
+  // same component the element form does.
+  if (expression?.type === "ArrowFunctionExpression") {
+    expression = expression.body
+  }
+  return expression?.type === "JSXElement" ? expression.openingElement : null
+}
+
 // Calls `onSite` for every class site in the file.
 export function classSiteVisitors(
   context: any,
@@ -1005,11 +1027,20 @@ export function classSiteVisitors(
     )
   }
 
+  // A render prop replaces the element, and the className lands on what
+  // it renders, so that is the component wearing the classes.
   const elementOf = (node: any) => {
     const element = node.parent
-    return element?.type === "JSXOpeningElement"
-      ? tracker.resolve(element.name)
-      : null
+    if (element?.type !== "JSXOpeningElement") return null
+    const rendered = renderedOpeningOf(element)
+    if (rendered === undefined) return tracker.resolve(element.name)
+    if (!rendered) return null
+    const resolved = tracker.resolve(rendered.name)
+    if (!resolved) return null
+    return {
+      ...resolved,
+      wrapper: resolved.wrapper ?? jsxNameText(element.name),
+    }
   }
 
   // Fragments and expression containers are not layout parents.
