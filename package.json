@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm --filter @shadcn/lint run build",
+    "build": "node api.js && pnpm --filter @shadcn/lint run build",
     "test": "pnpm --filter @shadcn/lint run build && pnpm --filter @shadcn/lint run test",
     "typecheck": "pnpm --filter @shadcn/lint exec tsc --noEmit",
     "lint": "eslint .",

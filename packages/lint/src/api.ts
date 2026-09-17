@@ -16,12 +16,18 @@ export type ShadcnRuleSetting =
   | 2
   | ["off" | "warn" | "error" | 0 | 1 | 2, ...unknown[]]
 
+export interface ShadcnLintOverride {
+  files: string | string[]
+  rules: Partial<Record<ShadcnRuleId, ShadcnRuleSetting>>
+}
+
 export interface ShadcnLintConfig {
   cwd?: string
   files?: string[]
   ignores?: string[]
   settings?: Record<string, unknown>
   rules: Partial<Record<ShadcnRuleId, ShadcnRuleSetting>>
+  overrides?: ShadcnLintOverride[]
 }
 
 export interface ShadcnLintSuggestion {
@@ -297,8 +303,33 @@ export async function lintFiles(
     const included = new Set(await glob(config.files, { cwd, absolute: true }))
     files = files.filter((file) => included.has(file))
   }
+  const overrideSets: {
+    rules: Partial<Record<ShadcnRuleId, ShadcnRuleSetting>>
+    files: Set<string>
+  }[] = []
+  for (const override of config.overrides ?? []) {
+    const patterns = Array.isArray(override.files)
+      ? override.files
+      : [override.files]
+    overrideSets.push({
+      rules: override.rules ?? {},
+      files: new Set(await glob(patterns, { cwd, absolute: true })),
+    })
+  }
   const results = await Promise.all(
-    files.map((file: string) => lintFile(file, { ...config, cwd }))
+    files.map((file: string) => {
+      let rules = config.rules
+      if (overrideSets.length) {
+        let merged: Partial<Record<ShadcnRuleId, ShadcnRuleSetting>> | null =
+          null
+        for (const override of overrideSets) {
+          if (!override.files.has(file)) continue
+          merged = { ...(merged ?? rules), ...override.rules }
+        }
+        if (merged) rules = merged
+      }
+      return lintFile(file, { ...config, cwd, rules })
+    })
   )
   return results.flat()
 }
