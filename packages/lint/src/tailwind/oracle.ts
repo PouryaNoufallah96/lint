@@ -195,6 +195,16 @@ export function resolveStylesheet(base: string, id: string) {
   return stylesheetAt(pkgDir, "index")
 }
 
+// The real path of a file reached through a symlink: what its own
+// imports resolve from.
+function realpathOf(file: string) {
+  try {
+    return fs.realpathSync.native(file)
+  } catch {
+    return file
+  }
+}
+
 function mtimeOf(file: string) {
   try {
     return fs.statSync(file).mtimeMs
@@ -220,11 +230,15 @@ async function build(cssFile: string): Promise<Loaded> {
     base: dir,
     async loadStylesheet(id, base) {
       if (/^(?:https?:|data:)/.test(id)) return { base, content: "" }
-      const file = resolveStylesheet(base, id)
+      const resolved = resolveStylesheet(base, id)
       // Refusing to judge beats judging against half a theme.
-      if (!file) {
+      if (!resolved) {
         throw new Error(`@import "${id}" could not be resolved from ${base}`)
       }
+      // A pnpm-installed package is a link into node_modules/.pnpm and its
+      // own dependencies sit beside the real file, so the base for the
+      // imports inside it is the directory that file really lives in.
+      const file = realpathOf(resolved)
       files.push(file)
       return {
         base: path.dirname(file),
