@@ -258,6 +258,9 @@ pass with layout allowed.
 
 `unclassified` is a reported category, not an allowance you can configure.
 Allow a custom class by name, for example `allow: ["layout", "tap-target"]`.
+A class your own CSS declares with `@utility`, or as a plain selector, is
+still `unclassified`: the rule cannot read what it changes. It is reported
+in its own words, which do not call it a misspelling.
 You can open a category for a component with a contract:
 
 ```js

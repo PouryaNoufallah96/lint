@@ -5,6 +5,7 @@
 import * as fs from "node:fs"
 import * as path from "node:path"
 
+import { normalizeClass } from "../grammar/classes"
 import { parseColor, type Lab } from "../grammar/colors"
 import { lengthInPx } from "../grammar/lengths"
 import { FONT_SIZES, RADII } from "../grammar/tailwind-theme"
@@ -505,6 +506,31 @@ export function themeVocabularyFor(fromFile: string) {
     tokens: read.tokens,
     utilities: read.utilities,
   })
+}
+
+const utilityPrefixes = new WeakMap<Set<string>, string[]>()
+
+// The `tab-` of an `@utility tab-*`, computed once per theme read.
+function prefixesOf(utilities: Set<string>) {
+  let list = utilityPrefixes.get(utilities)
+  if (!list) {
+    list = [...utilities]
+      .filter((name) => name.endsWith("*"))
+      .map((name) => name.slice(0, -1))
+    utilityPrefixes.set(utilities, list)
+  }
+  return list
+}
+
+// Whether the project's own CSS declares this class: an @utility name,
+// an @utility prefix, or a class selector. Tailwind generates such a
+// class, so a rule must not report it as a misspelling.
+export function declaresClass(fromFile: string, token: string) {
+  const base = normalizeClass(token).replace(/\/[\w.%]+$/, "")
+  if (!base) return false
+  const { utilities, classes } = knownClassesFor(fromFile)
+  if (utilities.has(base) || classes.has(base)) return true
+  return prefixesOf(utilities).some((prefix) => base.startsWith(prefix))
 }
 
 // What a project's CSS declares beyond Tailwind's own.

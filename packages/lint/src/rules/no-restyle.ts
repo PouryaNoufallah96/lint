@@ -4,6 +4,7 @@
 import { CATEGORIES } from "../grammar/categories"
 import { splitClasses } from "../grammar/classes"
 import { componentsFor } from "../project/components"
+import { declaresClass } from "../project/theme"
 import { sizeNamesFor, variantNamesFor } from "../project/variants"
 import { classSiteVisitors, type ClassSite } from "../sites/collect"
 import { compileContracts, configErrorVisitors } from "./contracts"
@@ -50,6 +51,9 @@ const MESSAGES = {
   layoutClass: `${NOT_ALLOWED} its contract allows {{entries}}. Use one of those, or put layout classes on a parent element.`,
   layoutClassClosed: `${NOT_ALLOWED} its contract allows no classes. Put layout classes on a parent element instead.`,
   unclassifiedClass: `${NOT_ALLOWED} the grammar does not recognize it. Fix the spelling, or use a class Tailwind generates.`,
+  // The project's CSS declares it, so Tailwind does generate it. What it
+  // changes is unreadable, so the contract still owns the decision.
+  declaredClass: `${NOT_ALLOWED} your CSS declares it, and the grammar cannot tell what it changes. Use a variant, or put it on a parent element.`,
   // Padding on a button usually means size; space around it is layout
   // the page owns. A component with no size axis is offered layout only.
   spacingClassWithSizes: `${NOT_ALLOWED} ${OWNS} ${SPACING_SIZES} ${SPACING_NEW_SIZE}`,
@@ -147,7 +151,9 @@ export const noRestyle = {
                   verdict.kind === "denied"
                     ? "deniedClass"
                     : verdict.category === "unclassified"
-                      ? "unclassifiedClass"
+                      ? declaresClass(filename, token)
+                        ? "declaredClass"
+                        : "unclassifiedClass"
                       : verdict.entries.length
                         ? "layoutClass"
                         : "layoutClassClosed",
